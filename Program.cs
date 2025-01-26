@@ -16,11 +16,24 @@ namespace DXT1Decompressor
             Console.WriteLine("╚════════════════════════════════════════╝");
             Console.ResetColor();
 
-            // Request the file path
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("📂 Please enter the path to the file:");
-            Console.ResetColor();
-            string filePath = Console.ReadLine();
+            string filePath;
+
+            // Check if the program was launched with an argument
+            if (args.Length > 0)
+            {
+                filePath = args[0];
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"📂 File path provided via argument: {filePath}");
+                Console.ResetColor();
+            }
+            else
+            {
+                // Request the file path if no argument was provided
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("📂 Please enter the path to the file:");
+                Console.ResetColor();
+                filePath = Console.ReadLine();
+            }
 
             // Check if the file exists
             if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
