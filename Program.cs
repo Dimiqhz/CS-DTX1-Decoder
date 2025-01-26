@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -83,6 +83,11 @@ namespace DXT1Decompressor
             {
                 PrintMessage($"❌ An error occurred: {ex.Message}", ConsoleColor.Red);
             }
+            finally
+            {
+                // Prompt to keep the terminal open
+                PromptExit();
+            }
         }
 
         /// <summary>
@@ -96,6 +101,15 @@ namespace DXT1Decompressor
             Console.ForegroundColor = color;
             Console.WriteLine(message);
             Console.ForegroundColor = previousColor;
+        }
+
+        /// <summary>
+        /// Prompts the user to press any key before exiting.
+        /// </summary>
+        static void PromptExit()
+        {
+            Console.WriteLine("\n🔚 Press any key to exit...");
+            Console.ReadKey();
         }
     }
 }
