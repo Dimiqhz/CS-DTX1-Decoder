@@ -30,7 +30,7 @@ namespace DXT1Decompressor
             else
             {
                 // Prompt the user to enter the file path
-                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.Write("📥 Please enter the path to the LRF file: ");
                 Console.ResetColor();
                 filePath = Console.ReadLine();
@@ -66,7 +66,7 @@ namespace DXT1Decompressor
                 PrintMessage($"📏 Dimensions: {tex.width}x{tex.height}, Components: {tex.components}", ConsoleColor.Cyan);
                 PrintMessage($"🖌  Format: {(tex.flags.HasFlag(LRFReader.LRFTexture.Flags.DXT1) ? "DXT1" : "RGB")}", ConsoleColor.Cyan);
                 PrintMessage($"🔢 Mipmap level: {tex.level}", ConsoleColor.Cyan);
-                PrintMessage($"📦 Size: {tex.size} bytes\n", ConsoleColor.Cyan);
+                PrintMessage($"📦 Size: {tex.size} bytes", ConsoleColor.Cyan);
                 PrintMessage("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n", ConsoleColor.Blue);
 
                 // Decompress the texture
