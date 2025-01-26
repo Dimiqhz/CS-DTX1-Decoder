@@ -7,13 +7,23 @@ using System.Threading.Tasks;
 
 namespace DXT1Decompressor
 {
+    /// <summary>
+    /// Class responsible for reading and extracting data from LRF files.
+    /// </summary>
     class LRFReader
     {
+        /// <summary>
+        /// Enum representing the type of data contained in the LRF archive.
+        /// </summary>
         public enum Type
         {
-            Unknown, Model, Shader, Texture
+            Unknown,
+            Model,
+            Shader,
+            Texture
         }
 
+        // Magic numbers and chunk identifiers
         const string lrf_magic = "Lrf ";
         const UInt32 lrf_magic_i = 0x4C726620;
         const string lrf_chunk_header = "LrfH";
@@ -24,6 +34,13 @@ namespace DXT1Decompressor
         const string lrf_chunk_shaderprogram = "LrSP";
         const string lrf_chunk_texture = "LrTx";
 
+        /// <summary>
+        /// Reads the chunk header from the binary reader.
+        /// </summary>
+        /// <param name="br">BinaryReader instance.</param>
+        /// <param name="id">Output chunk ID.</param>
+        /// <param name="siz">Output chunk size.</param>
+        /// <returns>True if successful, otherwise false.</returns>
         private static bool ReadChunkHeader(BinaryReader br, out string id, out UInt64 siz)
         {
             int pk = -1;
@@ -51,6 +68,11 @@ namespace DXT1Decompressor
             return true;
         }
 
+        /// <summary>
+        /// Converts the header type integer to the corresponding Type enum.
+        /// </summary>
+        /// <param name="type">Header type as UInt32.</param>
+        /// <returns>Corresponding Type enum value.</returns>
         private static Type HeaderTypeToType(UInt32 type)
         {
             switch (type)
@@ -62,12 +84,17 @@ namespace DXT1Decompressor
             return Type.Unknown;
         }
 
+        /// <summary>
+        /// Determines the type of the archive based on the file path.
+        /// </summary>
+        /// <param name="path">Path to the LRF file.</param>
+        /// <returns>Type of the archive.</returns>
         public static Type ArchiveType(string path)
         {
             FileStream fs = File.OpenRead(path);
             using (BinaryReader br = new BinaryReader(fs))
             {
-                var magic = br.ReadUInt32(); // magic
+                var magic = br.ReadUInt32(); // Read magic number
 
                 if (magic != lrf_magic_i)
                 {
@@ -87,11 +114,17 @@ namespace DXT1Decompressor
             return Type.Unknown;
         }
 
+        /// <summary>
+        /// Represents the header of the LRF file.
+        /// </summary>
         public class LRFHeader
         {
             public UInt32 type;
         }
 
+        /// <summary>
+        /// Represents a 3D mesh in the LRF file.
+        /// </summary>
         public class LRF3DMesh
         {
             public string name;
@@ -103,13 +136,20 @@ namespace DXT1Decompressor
             public UInt64 anims;
         }
 
+        /// <summary>
+        /// Represents a texture in the LRF file.
+        /// </summary>
         public class LRFTexture
         {
+            /// <summary>
+            /// Flags indicating the texture properties.
+            /// </summary>
             [Flags]
             public enum Flags
             {
                 DXT1 = 1
             }
+
             public UInt32 width, height, components;
             public Flags flags;
             public UInt32 level;
@@ -117,6 +157,12 @@ namespace DXT1Decompressor
             public byte[] data;
         }
 
+        /// <summary>
+        /// Loads a texture from the binary reader.
+        /// </summary>
+        /// <param name="br">BinaryReader instance.</param>
+        /// <param name="texture">Output LRFTexture.</param>
+        /// <returns>True if successful, otherwise false.</returns>
         public static bool LoadTexture(BinaryReader br, out LRFTexture texture)
         {
             texture = new LRFTexture();
@@ -131,7 +177,7 @@ namespace DXT1Decompressor
 
                 if (texture.size > int.MaxValue)
                 {
-                    Console.WriteLine("Texture size is too large.");
+                    Console.WriteLine("⚠️ Texture size is too large.");
                     return false;
                 }
 
@@ -139,7 +185,7 @@ namespace DXT1Decompressor
 
                 if (texture.data.Length != (int)texture.size)
                 {
-                    Console.WriteLine("Unexpected end of file while reading texture data.");
+                    Console.WriteLine("⚠️ Unexpected end of file while reading texture data.");
                     return false;
                 }
 
@@ -147,12 +193,17 @@ namespace DXT1Decompressor
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error reading texture: {ex.Message}");
+                Console.WriteLine($"❗ Error reading texture: {ex.Message}");
                 return false;
             }
         }
 
-
+        /// <summary>
+        /// Reads the header from the binary reader.
+        /// </summary>
+        /// <param name="br">BinaryReader instance.</param>
+        /// <param name="hdr">Output LRFHeader.</param>
+        /// <returns>True if successful, otherwise false.</returns>
         public static bool ReadHeader(BinaryReader br, out LRFHeader hdr)
         {
             hdr = new LRFHeader();
@@ -161,13 +212,23 @@ namespace DXT1Decompressor
             return true;
         }
 
+        /// <summary>
+        /// Checks if the binary reader is positioned at the start of an LRF file.
+        /// </summary>
+        /// <param name="br">BinaryReader instance.</param>
+        /// <returns>True if it's an LRF file, otherwise false.</returns>
         public static bool IsLRFFile(BinaryReader br)
         {
-            var magic = br.ReadUInt32(); // magic
+            var magic = br.ReadUInt32(); // Read magic number
 
             return magic == 0x4C726620;
         }
 
+        /// <summary>
+        /// Extracts details from the LRF file.
+        /// </summary>
+        /// <param name="path">Path to the LRF file.</param>
+        /// <returns>Dictionary containing extracted details.</returns>
         public static Dictionary<string, string> ExtractDetails(string path)
         {
             var ret = new Dictionary<string, string>();
@@ -177,7 +238,7 @@ namespace DXT1Decompressor
             {
                 if (!IsLRFFile(br))
                 {
-                    ret["Warning"] = "Not a valid LRF file!";
+                    ret["Warning"] = "⚠️ Not a valid LRF file!";
                     return ret;
                 }
 
@@ -203,7 +264,7 @@ namespace DXT1Decompressor
                             LRFTexture texture;
                             if (LoadTexture(br, out texture))
                             {
-                                ret["Resolution"] = string.Format("{0}x{1}x{2}", texture.width, texture.height, texture.components);
+                                ret["Resolution"] = $"{texture.width}x{texture.height}x{texture.components}";
                                 var flags = texture.flags;
                                 if (texture.flags.HasFlag(LRFTexture.Flags.DXT1))
                                 {
@@ -222,6 +283,11 @@ namespace DXT1Decompressor
             }
         }
 
+        /// <summary>
+        /// Loads a texture from the specified LRF file.
+        /// </summary>
+        /// <param name="path">Path to the LRF file.</param>
+        /// <returns>Loaded LRFTexture or null if not found.</returns>
         public static LRFTexture LoadTexture(string path)
         {
             LRFTexture ret = null;
@@ -266,6 +332,5 @@ namespace DXT1Decompressor
             }
             return ret;
         }
-
     }
 }

@@ -1,5 +1,8 @@
 ﻿using System;
-using System.IO;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace DXT1Decompressor
 {
@@ -7,9 +10,9 @@ namespace DXT1Decompressor
     {
         static void Main(string[] args)
         {
-            Console.OutputEncoding = System.Text.Encoding.UTF8; // Enable Unicode support
+            // Set console to use UTF-8 encoding to support emojis
+            Console.OutputEncoding = Encoding.UTF8;
 
-            // Program header with Unicode and color
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("╔════════════════════════════════════════╗");
             Console.WriteLine("║       🎨 DXT1 Texture Decompressor     ║");
@@ -18,130 +21,81 @@ namespace DXT1Decompressor
 
             string filePath;
 
-            // Check if the program was launched with an argument
+            // Check if a file path is provided as a command-line argument
             if (args.Length > 0)
             {
                 filePath = args[0];
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"📂 File path provided via argument: {filePath}");
-                Console.ResetColor();
+                PrintMessage($"📂 Using file from arguments: {filePath}", ConsoleColor.Cyan);
             }
             else
             {
-                // Request the file path if no argument was provided
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("📂 Please enter the path to the file:");
+                // Prompt the user to enter the file path
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.Write("📥 Please enter the path to the LRF file: ");
                 Console.ResetColor();
                 filePath = Console.ReadLine();
             }
 
-            // Check if the file exists
-            if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
+            // Validate the provided file path
+            if (string.IsNullOrWhiteSpace(filePath))
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"❌ File not found or invalid path: {filePath}");
-                Console.ResetColor();
+                PrintMessage("❌ No file path provided. Exiting.", ConsoleColor.Red);
+                return;
+            }
+
+            if (!System.IO.File.Exists(filePath))
+            {
+                PrintMessage($"❌ File not found: {filePath}", ConsoleColor.Red);
                 return;
             }
 
             try
             {
-                using (var stream = File.OpenRead(filePath))
-                using (var br = new BinaryReader(stream))
+                PrintMessage($"🔍 Loading texture from: {filePath}\n", ConsoleColor.Yellow);
+                var tex = LRFReader.LoadTexture(filePath);
+
+                if (tex == null)
                 {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine($"📂 Loading file: {filePath}");
-                    Console.ResetColor();
-
-                    if (LoadTexture(br, out var texture))
-                    {
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.WriteLine("\n✅ Successfully loaded texture:\n");
-                        Console.ResetColor();
-
-                        // Display texture data with icons and dividers
-                        Console.ForegroundColor = ConsoleColor.Blue;
-                        Console.WriteLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-                        Console.WriteLine($"🖼️  Width       : {texture.width}");
-                        Console.WriteLine($"🖼️  Height      : {texture.height}");
-                        Console.WriteLine($"🎨 Components  : {texture.components}");
-                        Console.WriteLine($"⚙️  Flags       : {texture.flags}");
-                        Console.WriteLine($"🔄 Level       : {texture.level}");
-                        Console.WriteLine($"📦 Size (bytes): {texture.size}");
-                        Console.WriteLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-                        Console.ResetColor();
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("❌ Failed to load texture. The file may be invalid.");
-                        Console.ResetColor();
-                    }
+                    PrintMessage("❌ Failed to load texture from the specified file.", ConsoleColor.Red);
+                    return;
                 }
+
+                // Display texture details
+                PrintMessage("✅ Texture loaded successfully.", ConsoleColor.Green);
+                PrintMessage("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", ConsoleColor.Blue);
+                PrintMessage($"📏 Dimensions: {tex.width}x{tex.height}, Components: {tex.components}", ConsoleColor.Cyan);
+                PrintMessage($"🖌  Format: {(tex.flags.HasFlag(LRFReader.LRFTexture.Flags.DXT1) ? "DXT1" : "RGB")}", ConsoleColor.Cyan);
+                PrintMessage($"🔢 Mipmap level: {tex.level}", ConsoleColor.Cyan);
+                PrintMessage($"📦 Size: {tex.size} bytes\n", ConsoleColor.Cyan);
+                PrintMessage("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n", ConsoleColor.Blue);
+
+                // Decompress the texture
+                PrintMessage("🖥  Decompressing DXT1 texture...", ConsoleColor.Yellow);
+                var decompressor = new DXT1Decompressor((int)tex.width, (int)tex.height, tex.data);
+                var bitmap = decompressor.ToBitmap();
+
+                // Generate output file name based on input file
+                string outputFileName = System.IO.Path.GetFileNameWithoutExtension(filePath) + ".bmp";
+                bitmap.Save(outputFileName);
+                PrintMessage($"💾 Bitmap saved as: {outputFileName}", ConsoleColor.Green);
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"❌ Error: {ex.Message}");
-                Console.ResetColor();
+                PrintMessage($"❌ An error occurred: {ex.Message}", ConsoleColor.Red);
             }
         }
 
-        public static bool LoadTexture(BinaryReader br, out LRFTexture texture)
+        /// <summary>
+        /// Prints a colored message to the console with optional emoji support.
+        /// </summary>
+        /// <param name="message">The message to display.</param>
+        /// <param name="color">The color of the message text.</param>
+        static void PrintMessage(string message, ConsoleColor color)
         {
-            texture = new LRFTexture();
-            try
-            {
-                texture.width = br.ReadUInt32();
-                texture.height = br.ReadUInt32();
-                texture.components = br.ReadUInt32();
-                texture.flags = (LRFTexture.Flags)br.ReadUInt32();
-                texture.level = br.ReadUInt32();
-                texture.size = br.ReadUInt64();
-
-                if (texture.size > int.MaxValue)
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("❌ Texture size is too large.");
-                    Console.ResetColor();
-                    return false;
-                }
-
-                texture.data = br.ReadBytes((int)texture.size);
-
-                if (texture.data.Length != (int)texture.size)
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("❌ Unexpected end of file while reading texture data.");
-                    Console.ResetColor();
-                    return false;
-                }
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"❌ Error reading texture: {ex.Message}");
-                Console.ResetColor();
-                return false;
-            }
-        }
-    }
-
-    public class LRFTexture
-    {
-        public uint width { get; set; }
-        public uint height { get; set; }
-        public uint components { get; set; }
-        public Flags flags { get; set; }
-        public uint level { get; set; }
-        public ulong size { get; set; }
-        public byte[] data { get; set; }
-
-        public enum Flags
-        {
-            None = 0
+            var previousColor = Console.ForegroundColor;
+            Console.ForegroundColor = color;
+            Console.WriteLine(message);
+            Console.ForegroundColor = previousColor;
         }
     }
 }
