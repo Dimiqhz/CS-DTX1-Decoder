@@ -9,29 +9,24 @@ namespace DXT1Decompressor
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8; // Enable Unicode support
 
-            // Program title with Unicode and color
+            // Program header with Unicode and color
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("╔════════════════════════════════════════╗");
             Console.WriteLine("║       🎨 DXT1 Texture Decompressor     ║");
             Console.WriteLine("╚════════════════════════════════════════╝");
             Console.ResetColor();
 
-            // Check path
-            if (args.Length < 1)
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("⚠️  Usage: App.exe <path/to/file>");
-                Console.ResetColor();
-                return;
-            }
+            // Request the file path
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("📂 Please enter the path to the file:");
+            Console.ResetColor();
+            string filePath = Console.ReadLine();
 
-            string filePath = args[0];
-
-            // Check file exists
-            if (!File.Exists(filePath))
+            // Check if the file exists
+            if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"❌ File not found: {filePath}");
+                Console.WriteLine($"❌ File not found or invalid path: {filePath}");
                 Console.ResetColor();
                 return;
             }
@@ -51,7 +46,7 @@ namespace DXT1Decompressor
                         Console.WriteLine("\n✅ Successfully loaded texture:\n");
                         Console.ResetColor();
 
-                        // Send data
+                        // Display texture data with icons and dividers
                         Console.ForegroundColor = ConsoleColor.Blue;
                         Console.WriteLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
                         Console.WriteLine($"🖼️  Width       : {texture.width}");
