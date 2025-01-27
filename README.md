@@ -13,7 +13,7 @@ DXT1 Decompressor is a simple C# application designed to decompress DXT1 compres
 - [ ] Converting and decompressing TGA files.
 - [ ] GUI interface
 
-##🚀 Getting Started
+## 🚀 Getting Started
 
 ### 🔧 Prerequisites
 .NET 8.0 Framework: Ensure you have the .NET Framework installed. You can download it from here.
@@ -44,21 +44,18 @@ Example:
 ```bash
 dotnet run -- "C:\Textures\uv_grid.lrf"
 ```
-Upon successful execution, the decompressed bitmap will be saved in the same directory as the input file with the .bmp extension.
+Upon successful execution, the decompressed bitmap will be saved in the same directory as the input file with the `.bmp` extension.
 
 🖥️ Interactive Mode
-If you run the application without any arguments, it will prompt you to enter the path to the LRF file.
+You can also download and unzip the files from the release and run them `.exe` file without arguments.
 
-```bash
-dotnet run
-```
 Sample Interaction:
 
 ![alt text](https://github.com/Dimiqhz/CS-DTX1-Decompressor/tree/main/screenshots/example.png)
 
 The resulting bitmap will have the same name as the input file but with a .bmp extension.
 
-##📝 Notes
+## 📝 Notes
 Ensure that the LRF files you intend to decompress contain textures. The application currently supports textures compressed with DXT1.
 If the application encounters issues with the file (e.g., invalid format, unsupported compression), it will display appropriate error messages with colored indicators.
 
