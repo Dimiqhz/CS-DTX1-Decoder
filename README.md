@@ -51,7 +51,7 @@ You can also download and unzip the files from the release and run them `.exe` f
 
 Sample Interaction:
 
-![alt text](https://github.com/Dimiqhz/CS-DTX1-Decompressor/tree/main/screenshots/example.png)
+![alt text](https://github.com/Dimiqhz/CS-DTX1-Decompressor/blob/main/screenshots/example.png)
 
 The resulting bitmap will have the same name as the input file but with a .bmp extension.
 
