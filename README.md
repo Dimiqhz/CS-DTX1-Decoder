@@ -19,7 +19,7 @@ DXT1 Decompressor is a simple C# application designed to decompress DXT1 compres
 .NET 8.0 Framework: Ensure you have the .NET Framework installed. You can download it from here.
 System.Drawing: The application uses System.Drawing for bitmap manipulation. Ensure your environment supports it.
 
-###🛠️ Building the Project
+### 🛠️ Building the Project
 Clone the Repository
 ```bash
 git clone https://github.com/Dimiqhz/DXT1Decompressor.git
