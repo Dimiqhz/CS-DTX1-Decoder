@@ -22,7 +22,7 @@ System.Drawing: The application uses System.Drawing for bitmap manipulation. Ens
 ###🛠️ Building the Project
 Clone the Repository
 ```bash
-git clone https://github.com/yourusername/DXT1Decompressor.git
+git clone https://github.com/Dimiqhz/DXT1Decompressor.git
 ```
 Navigate to the Project Directory
 ```bash
